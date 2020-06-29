@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "stock-management",
-    "slug": "stock-management",
+    "name": "Inventory Management",
+    "slug": "inventory-management",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,11 +13,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.jamesj0717.inventory-management"
     },
     "web": {
       "favicon": "./assets/favicon.png"

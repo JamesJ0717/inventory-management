@@ -23,7 +23,7 @@ export default function Scanner({ route, navigation }) {
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
     if (!type.includes("QR"))
-      await Axios.get(`https://api.upcitemdb.com/prod/trial/lookup?upc=${data}`).then(async (res) => {
+      Axios.get(`https://api.upcitemdb.com/prod/trial/lookup?upc=${data}`).then(async (res) => {
         if (res.data.items.length == 0) {
           return Alert.alert("Uh-oh!", "The item you scanned is not in the database!", [
             { text: "Ok", onPress: () => navigation.navigate("Home") },
@@ -35,10 +35,7 @@ export default function Scanner({ route, navigation }) {
             .once("value", async (a) => {
               let item = {
                 brand: res.data.items[0].brand,
-                category: res.data.items[0].category,
                 description: res.data.items[0].description,
-                ean: res.data.items[0].ean,
-                elid: res.data.items[0].elid,
                 images: res.data.items[0].images,
                 title: res.data.items[0].title,
                 upc: res.data.items[0].upc,
@@ -60,7 +57,6 @@ export default function Scanner({ route, navigation }) {
                   .ref(`${UID}/items/`)
                   .child(item.upc)
                   .once("value", (res) => (item.quantity = res.toJSON()?.quantity));
-                console.log(++item.quantity);
                 await firebase
                   .database()
                   .ref(`${UID}/items/${item.upc}/`)

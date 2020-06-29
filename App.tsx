@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { AppRegistry, AsyncStorage, Button } from "react-native";
+import { AppRegistry, Button } from "react-native";
+import AsyncStorage from "@react-native-community/async-storage";
 // @ts-ignore
-import { DefaultTheme, ThemeProvider } from "react-native-ios-kit";
+import { DefaultTheme, ThemeProvider, DarkTheme } from "react-native-ios-kit";
 import { NavigationContainer, BaseRouter } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import firebase from "firebase";
@@ -13,7 +14,7 @@ import Login from "./Components/Login";
 import Register from "./Components/Register";
 
 const theme = {
-  ...DefaultTheme,
+  ...DarkTheme,
 };
 
 export default function App() {
@@ -41,7 +42,7 @@ export default function App() {
       if (uid != null) setUID(uid);
     };
     f();
-  });
+  }, [UID]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -53,22 +54,31 @@ export default function App() {
               bottom: 50,
             },
             headerStyle: { backgroundColor: theme.barColor },
-            headerTitleStyle: { fontSize: 30 },
+            headerTitleStyle: { fontSize: 30, color: theme.textColor },
           }}
         >
           {UID == undefined ? (
             <>
-              <Stack.Screen name="Login" component={Login} />
-              <Stack.Screen name="Register" component={Register} />
+              <Stack.Screen name="Login" component={Login} initialParams={{ setUID: setUID }} />
+              <Stack.Screen name="Register" component={Register} initialParams={{ setUID: setUID }} />
             </>
           ) : (
             <>
               <Stack.Screen
                 name="Home"
                 component={Home}
-                options={(route) => ({
+                options={{
                   title: "Inventory Management",
-                })}
+                  headerRight: () => (
+                    <Button
+                      title="Logout"
+                      onPress={() => {
+                        AsyncStorage.removeItem("UID");
+                        setUID(undefined);
+                      }}
+                    />
+                  ),
+                }}
               />
               <Stack.Screen
                 name="Details"

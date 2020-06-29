@@ -55,7 +55,9 @@ export default function Home({ route, navigation }) {
     <View
       style={{
         flex: 1,
-        alignItems: "center",
+        alignItems: "stretch",
+        backgroundColor: theme.backgroundColor,
+        paddingBottom: safeArea.bottom,
       }}
     >
       <SearchBar
@@ -73,30 +75,30 @@ export default function Home({ route, navigation }) {
           setitems(localItems);
         }}
       ></SearchBar>
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <FlatList
-          data={items}
-          renderItem={({ item }) => (
-            <NavigationRow
-              title={item.title}
-              subtitle={`Quantity: ${item.quantity}`}
-              onPress={() => navigation.navigate("Details", { item: item })}
-              key={item.upc}
-            />
-          )}
-          keyExtractor={(item) => item.elid}
-          contentContainerStyle={{
-            paddingBottom: safeArea.bottom,
-            backgroundColor: theme.backgroundColor,
-          }}
-        />
-      </ScrollView>
+      <FlatList
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        data={items}
+        renderItem={({ item }) => (
+          <NavigationRow
+            title={item.title}
+            subtitle={`Quantity: ${item.quantity}`}
+            onPress={() => navigation.navigate("Details", { item: item })}
+            key={item.upc}
+          />
+        )}
+        keyExtractor={(item) => item.upc}
+        contentContainerStyle={{
+          paddingBottom: safeArea.bottom,
+          alignItems: "stretch",
+        }}
+      />
+
       <Button
         rounded
         inverted
         centered
         innerStyle={{ fontSize: 24 }}
-        style={{ height: 50, margin: 20, width: "90%" }}
+        style={{ height: 50, margin: 20, width: "90%", backgroundColor: theme.primaryColor }}
         onPress={() => navigation.navigate("Scanner")}
       >
         Add Item
