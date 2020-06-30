@@ -3,7 +3,7 @@ import { View, Text, Image, ScrollView, Modal, StyleSheet } from "react-native";
 import color from "color";
 
 //@ts-expect-error
-import { InfoRow, NavigationRow, useTheme, Button, Title1 } from "react-native-ios-kit";
+import { InfoRow, NavigationRow, useTheme, Button, Title1, TextField } from "react-native-ios-kit";
 import { Item } from "../Models/Item";
 import { useSafeArea } from "react-native-safe-area-context";
 import firebase from "firebase";
@@ -15,7 +15,9 @@ export default function ItemView({ route, navigation }) {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [changed, setChanged] = useState(false);
+  const [textChanged, setTextChanged] = useState(false);
   const [modalText, setModalText] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
   const [quantity, setQuantity] = useState(item.quantity);
   const [UID, setUID] = useState("");
 
@@ -47,60 +49,9 @@ export default function ItemView({ route, navigation }) {
     },
   });
 
-  useEffect(() => {
-    let f = async () => {
-      await AsyncStorage.getItem("UID").then((res) => {
-        if (res) setUID(res);
-      });
-    };
-    f();
-  }, []);
-
-  return (
-    <ScrollView
-      style={{
-        flex: 1,
-        paddingBottom: safeArea.bottom,
-        paddingTop: safeArea.top,
-        backgroundColor: theme.backgroundColor,
-        paddingLeft: 10,
-        paddingRight: 10,
-      }}
-    >
-      {item.images ? (
-        <Image source={{ uri: item.images[0] }} style={{ height: 150, width: 150, alignSelf: "center", margin: 5 }} />
-      ) : (
-        <></>
-      )}
-
-      <View style={{ alignItems: "stretch", justifyContent: "space-between" }}>
-        <InfoRow title={"Brand"} info={item.brand} />
-        {item.title.length > 25 ? (
-          <NavigationRow
-            title={"Title"}
-            info={"".concat(item.title.substring(0, 25), "...")}
-            onPress={() => {
-              setModalText(item.title);
-              setModalVisible(true);
-            }}
-          />
-        ) : (
-          <InfoRow title="Title" info={item.title} />
-        )}
-        {item.description.length > 25 ? (
-          <NavigationRow
-            title={"Description"}
-            info={"".concat(item.description.substring(0, 25), "...")}
-            onPress={() => {
-              setModalText(item.description);
-              setModalVisible(true);
-            }}
-          />
-        ) : (
-          <InfoRow title="Description" info={item.description} />
-        )}
-        <InfoRow title="Quantity" info={quantity.toString()} />
-        <InfoRow title="UPC" info={item.upc} />
+  let quantityButtons = () => {
+    return (
+      <>
         <View style={{ margin: 10 }}>
           <Title1 style={{ alignSelf: "center" }}>Quantity</Title1>
           <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
@@ -153,29 +104,151 @@ export default function ItemView({ route, navigation }) {
         ) : (
           <></>
         )}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(false);
-          }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={{ color: theme.textColor }}>{modalText}</Text>
+      </>
+    );
+  };
+
+  let modal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Title1>{modalTitle}</Title1>
+            <TextField
+              multiline
+              style={{ color: theme.textColor }}
+              inputStyle={{}}
+              onValueChange={(text: string) => {
+                setModalText(text);
+                setTextChanged(true);
+              }}
+            >
+              {modalText}
+            </TextField>
+            {textChanged ? (
               <Button
                 rounded
                 inverted
-                inline
+                innerStyle={{ fontSize: 24 }}
                 style={{ height: 50, margin: 20, backgroundColor: theme.primaryColor }}
-                onPress={() => setModalVisible(false)}
+                onPress={() => {
+                  console.log(modalText, modalTitle);
+                  switch (modalTitle.toLowerCase()) {
+                    case "brand":
+                      item.brand = modalText;
+                      break;
+                    case "description":
+                      item.description = modalText;
+                      break;
+                    case "title":
+                      item.title = modalText;
+                      break;
+                    default:
+                      break;
+                  }
+                  firebase
+                    .database()
+                    .ref(`${UID}/items/${item.upc}`)
+                    .update(item)
+                    .then(() => {
+                      setTextChanged(false);
+                      setModalVisible(false);
+                    });
+                }}
               >
-                Close
+                Save Changes
               </Button>
-            </View>
+            ) : (
+              <></>
+            )}
+            <Button
+              rounded
+              inverted
+              inline
+              innerStyle={{ fontSize: 24 }}
+              style={{ height: 50, margin: 20, backgroundColor: theme.primaryColor }}
+              onPress={() => setModalVisible(false)}
+            >
+              Close
+            </Button>
           </View>
-        </Modal>
+        </View>
+      </Modal>
+    );
+  };
+
+  useEffect(() => {
+    let f = async () => {
+      await AsyncStorage.getItem("UID").then((res) => {
+        if (res) setUID(res);
+      });
+    };
+    f();
+  }, []);
+
+  return (
+    <ScrollView
+      style={{
+        flex: 1,
+        padding: 10,
+        backgroundColor: theme.backgroundColor,
+      }}
+    >
+      {item.images ? (
+        <Image source={{ uri: item.images[0] }} style={{ height: 150, width: 150, alignSelf: "center", margin: 5 }} />
+      ) : (
+        <></>
+      )}
+
+      <View style={{ alignItems: "stretch", justifyContent: "space-between" }}>
+        <NavigationRow
+          title={"Brand"}
+          info={item.brand}
+          onPress={() => {
+            setModalText(item.brand);
+            setModalTitle("brand");
+            setModalVisible(true);
+          }}
+        />
+
+        <NavigationRow
+          title={"Title"}
+          info={item.title.substring(0, 15).concat("...")}
+          onPress={() => {
+            setModalText(item.title);
+            setModalTitle("Title");
+            setModalVisible(true);
+          }}
+        />
+        <NavigationRow
+          title={"Description"}
+          info={item.description.substring(0, 15).concat("...")}
+          onPress={() => {
+            setModalText(item.description);
+            setModalTitle("Description");
+            setModalVisible(true);
+          }}
+        />
+        {item.offers ? (
+          <>
+            <InfoRow title="Retailer" info={item.offers[0].merchant} />
+            <InfoRow title="Price" info={`$${item.offers[0].price}`} />
+          </>
+        ) : (
+          <></>
+        )}
+        <InfoRow title="Quantity" info={quantity.toString()} />
+        <InfoRow title="UPC" info={item.upc} />
+
+        {quantityButtons()}
+        {modal()}
       </View>
       {changed ? <Button title="Save" onPress={() => console.log("save")} /> : <></>}
     </ScrollView>

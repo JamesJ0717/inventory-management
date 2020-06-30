@@ -80,7 +80,8 @@ export default function Home({ route, navigation }) {
         data={items}
         renderItem={({ item }) => (
           <NavigationRow
-            title={item.title}
+            title={item.brand}
+            info={item.title}
             subtitle={`Quantity: ${item.quantity}`}
             onPress={() => navigation.navigate("Details", { item: item })}
             key={item.upc}

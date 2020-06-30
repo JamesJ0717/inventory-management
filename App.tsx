@@ -42,7 +42,7 @@ export default function App() {
       if (uid != null) setUID(uid);
     };
     f();
-  }, [UID]);
+  }, [AsyncStorage.getItem("UID")]);
 
   return (
     <ThemeProvider theme={theme}>

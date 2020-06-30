@@ -33,12 +33,8 @@ export default function Scanner({ route, navigation }) {
             .database()
             .ref(`${UID}/items/`)
             .once("value", async (a) => {
-              let item = {
-                brand: res.data.items[0].brand,
-                description: res.data.items[0].description,
-                images: res.data.items[0].images,
-                title: res.data.items[0].title,
-                upc: res.data.items[0].upc,
+              let item: Item = {
+                ...res.data.items[0],
                 quantity: 1,
               };
               if (a.hasChild(item.upc) == false) {
