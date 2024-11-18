@@ -21,7 +21,7 @@
     "expo-crypto": "^8.2.1",
     "expo-facebook": "^8.2.1",
     "expo-status-bar": "^1.0.0",
-    "firebase": "7.9.0",
+    "firebase": "10.9.0",
     "react": "16.11.0",
     "react-bootstrap": "^1.0.1",
     "react-dom": "16.11.0",
